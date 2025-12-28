@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamington Road Market - Hardware Sourcing Engine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bios-container">
+        <div class="bios-header">
+            <div class="bios-title">LAMINGTON ROAD MARKET BIOS v2.1</div>
+            <div class="bios-subtitle">Hardware Sourcing Engine - Mumbai Electronics Hub</div>
+            <div class="system-info">
+                <span>System Time: <span id="system-time"></span></span>
+                <span>Market Status: <span id="market-status" class="status-online">ONLINE</span></span>
+            </div>
+        </div>
+
+        <div class="main-menu" id="main-menu">
+            <div class="menu-title">MAIN MENU</div>
+            <div class="menu-items">
+                <div class="menu-item" data-section="search">
+                    <span class="menu-key">[1]</span> Component Search Engine
+                </div>
+                <div class="menu-item" data-section="authenticity">
+                    <span class="menu-key">[2]</span> Authenticity Analysis
+                </div>
+                <div class="menu-item" data-section="adapters">
+                    <span class="menu-key">[3]</span> Legacy Port Adapters
+                </div>
+                <div class="menu-item" data-section="jugaad">
+                    <span class="menu-key">[4]</span> Jugaad Solutions
+                </div>
+                <div class="menu-item" data-section="negotiation">
+                    <span class="menu-key">[5]</span> Price Negotiation
+                </div>
+                <div class="menu-item" data-section="gray-market">
+                    <span class="menu-key">[6]</span> Gray Market Analysis
+                </div>
+                <div class="menu-item" data-section="market-map">
+                    <span class="menu-key">[7]</span> Market Section Map
+                </div>
+                <div class="menu-item" data-section="system-info">
+                    <span class="menu-key">[8]</span> System Information
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section" id="search-section" style="display: none;">
+            <div class="section-header">COMPONENT SEARCH ENGINE</div>
+            <div class="search-form">
+                <div class="form-group">
+                    <label>Component Specification:</label>
+                    <input type="text" id="search-input" placeholder="e.g., Intel i7-12700K, DDR4 16GB 3200MHz, RTX 4070">
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="performSearch()">Search Components</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="search-results" id="search-results"></div>
+        </div>
+
+        <div class="content-section" id="authenticity-section" style="display: none;">
+            <div class="section-header">AUTHENTICITY ANALYSIS</div>
+            <div class="authenticity-form">
+                <div class="form-group">
+                    <label>Component ID:</label>
+                    <input type="text" id="authenticity-input" placeholder="Enter component ID for analysis">
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="analyzeAuthenticity()">Analyze Component</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="analysis-results" id="authenticity-results"></div>
+        </div>
+
+        <div class="content-section" id="adapters-section" style="display: none;">
+            <div class="section-header">LEGACY PORT ADAPTERS</div>
+            <div class="adapters-form">
+                <div class="form-group">
+                    <label>Legacy Port Type:</label>
+                    <select id="legacy-port-select">
+                        <option value="VGA">VGA (D-Sub 15-pin)</option>
+                        <option value="DVI">DVI (Digital Visual Interface)</option>
+                        <option value="PS2">PS/2 (Keyboard/Mouse)</option>
+                        <option value="Serial">Serial Port (RS-232)</option>
+                        <option value="Parallel">Parallel Port (LPT)</option>
+                        <option value="IDE">IDE/PATA</option>
+                        <option value="Floppy">Floppy Drive</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="findAdapters()">Find Adapters</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="adapters-results" id="adapters-results"></div>
+        </div>
+
+        <div class="content-section" id="jugaad-section" style="display: none;">
+            <div class="section-header">JUGAAD SOLUTIONS</div>
+            <div class="jugaad-form">
+                <div class="form-group">
+                    <label>Unavailable Component:</label>
+                    <input type="text" id="jugaad-input" placeholder="Enter component that's out of stock">
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="findJugaadSolutions()">Find Solutions</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="jugaad-results" id="jugaad-results"></div>
+        </div>
+
+        <div class="content-section" id="negotiation-section" style="display: none;">
+            <div class="section-header">PRICE NEGOTIATION CALCULATOR</div>
+            <div class="negotiation-form">
+                <div class="form-group">
+                    <label>Component ID:</label>
+                    <input type="text" id="negotiation-component" placeholder="Component to negotiate for">
+                </div>
+                <div class="form-group">
+                    <label>Quantity:</label>
+                    <input type="number" id="negotiation-quantity" placeholder="Number of units" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Vendor ID (Optional):</label>
+                    <input type="text" id="negotiation-vendor" placeholder="Preferred vendor ID">
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="calculateNegotiation()">Calculate Price</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="negotiation-results" id="negotiation-results"></div>
+        </div>
+
+        <div class="content-section" id="gray-market-section" style="display: none;">
+            <div class="section-header">GRAY MARKET ANALYSIS</div>
+            <div class="gray-market-form">
+                <div class="form-group">
+                    <label>Component ID:</label>
+                    <input type="text" id="gray-market-input" placeholder="Component for gray market analysis">
+                </div>
+                <div class="form-actions">
+                    <button class="bios-button" onclick="analyzeGrayMarket()">Analyze Market</button>
+                    <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+                </div>
+            </div>
+            <div class="gray-market-results" id="gray-market-results"></div>
+        </div>
+
+        <div class="content-section" id="market-map-section" style="display: none;">
+            <div class="section-header">LAMINGTON ROAD MARKET MAP</div>
+            <div class="market-map">
+                <div class="floor-section">
+                    <div class="floor-title">GROUND FLOOR - General Electronics</div>
+                    <div class="shop-grid">
+                        <div class="shop-item">A-101: Intel Corner</div>
+                        <div class="shop-item">A-102: AMD Hub</div>
+                        <div class="shop-item">A-103: Motherboard Central</div>
+                        <div class="shop-item">A-104: Power Supply Zone</div>
+                    </div>
+                </div>
+                <div class="floor-section">
+                    <div class="floor-title">FIRST FLOOR - Memory & Storage</div>
+                    <div class="shop-grid">
+                        <div class="shop-item">B-201: Corsair Store</div>
+                        <div class="shop-item">B-202: Kingston Kiosk</div>
+                        <div class="shop-item">B-203: SSD Specialists</div>
+                        <div class="shop-item">B-204: HDD Heaven</div>
+                    </div>
+                </div>
+                <div class="floor-section">
+                    <div class="floor-title">SECOND FLOOR - Graphics & Gaming</div>
+                    <div class="shop-grid">
+                        <div class="shop-item">C-301: NVIDIA Nook</div>
+                        <div class="shop-item">C-302: AMD Radeon Room</div>
+                        <div class="shop-item">C-303: Gaming Gear</div>
+                        <div class="shop-item">C-304: Cooling Solutions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+            </div>
+        </div>
+
+        <div class="content-section" id="system-info-section" style="display: none;">
+            <div class="section-header">SYSTEM INFORMATION</div>
+            <div class="system-details">
+                <div class="info-group">
+                    <div class="info-title">Hardware Sourcing Engine Status</div>
+                    <div class="info-item">Version: 2.1.0</div>
+                    <div class="info-item">Build Date: December 2024</div>
+                    <div class="info-item">Market Database: Updated</div>
+                    <div class="info-item">Vendor Network: 247 Active</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-title">Engine Modules</div>
+                    <div class="info-item">Component Parser: <span class="status-ok">OK</span></div>
+                    <div class="info-item">First Copy Heuristic: <span class="status-ok">OK</span></div>
+                    <div class="info-item">Component Bridge: <span class="status-ok">OK</span></div>
+                    <div class="info-item">Jugaad Detector: <span class="status-ok">OK</span></div>
+                    <div class="info-item">Negotiation Delta: <span class="status-ok">OK</span></div>
+                    <div class="info-item">Gray Market Analyzer: <span class="status-ok">OK</span></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-title">Market Statistics</div>
+                    <div class="info-item">Components Indexed: 15,247</div>
+                    <div class="info-item">Active Vendors: 247</div>
+                    <div class="info-item">Daily Searches: 1,832</div>
+                    <div class="info-item">Success Rate: 94.7%</div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="bios-button secondary" onclick="showMainMenu()">Back to Menu</button>
+            </div>
+        </div>
+
+        <div class="bios-footer">
+            <div class="footer-text">
+                Press [ESC] to return to main menu | Use number keys [1-8] for quick navigation
+            </div>
+            <div class="footer-info">
+                Lamington Road Market Hardware Sourcing Engine © 2024 | Mumbai Electronics Hub
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

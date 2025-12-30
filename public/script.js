@@ -328,7 +328,7 @@ function displaySearchResults(results) {
 
     let html = `<div class="result-title">Search Results (${results.length} found)</div>`;
     
-    results.forEach((result, index) => {
+    results.forEach((result) => {
         const component = result.component;
         html += `
             <div class="result-item">

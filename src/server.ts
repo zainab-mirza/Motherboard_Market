@@ -18,7 +18,15 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
+
+// Static file serving - different paths for local vs Vercel
+if (process.env.VERCEL) {
+  // In Vercel, static files are handled by the platform
+  // No need to serve static files from Express
+} else {
+  // Local development
+  app.use(express.static(path.join(__dirname, '../public')));
+}
 
 // Initialize engines
 const hardwareSourcingEngine = new HardwareSourcingEngine();
@@ -48,14 +56,14 @@ app.post('/api/search', (req, res) => {
 
     const results = hardwareSourcingEngine.searchComponents(searchQuery);
     
-    res.json({
+    return res.json({
       success: true,
       results,
       totalResults: results.length
     });
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({ error: 'Internal server error during search' });
+    return res.status(500).json({ error: 'Internal server error during search' });
   }
 });
 
@@ -70,13 +78,13 @@ app.post('/api/parse', (req, res) => {
 
     const parsed = componentParser.parseSpecification(specification);
     
-    res.json({
+    return res.json({
       success: true,
       parsed
     });
   } catch (error) {
     console.error('Parse error:', error);
-    res.status(500).json({ error: 'Internal server error during parsing' });
+    return res.status(500).json({ error: 'Internal server error during parsing' });
   }
 });
 
@@ -122,20 +130,20 @@ app.post('/api/authenticity', (req, res) => {
 
     const analysis = firstCopyHeuristic.calculateAuthenticityScore(sampleComponent);
     
-    res.json({
+    return res.json({
       success: true,
       analysis
     });
   } catch (error) {
     console.error('Authenticity analysis error:', error);
-    res.status(500).json({ error: 'Internal server error during authenticity analysis' });
+    return res.status(500).json({ error: 'Internal server error during authenticity analysis' });
   }
 });
 
 // Adapter identification endpoint
 app.post('/api/adapters', (req, res) => {
   try {
-    const { legacyPort, modernComponent } = req.body;
+    const { legacyPort } = req.body;
     
     if (!legacyPort) {
       return res.status(400).json({ error: 'Legacy port specification is required' });
@@ -174,20 +182,20 @@ app.post('/api/adapters', (req, res) => {
 
     const adapters = componentBridge.identifyAdapters(legacyPort, sampleComponent);
     
-    res.json({
+    return res.json({
       success: true,
       adapters
     });
   } catch (error) {
     console.error('Adapter identification error:', error);
-    res.status(500).json({ error: 'Internal server error during adapter identification' });
+    return res.status(500).json({ error: 'Internal server error during adapter identification' });
   }
 });
 
 // Jugaad solutions endpoint
 app.post('/api/jugaad', (req, res) => {
   try {
-    const { targetComponentId, availableComponents } = req.body;
+    const { targetComponentId } = req.body;
     
     if (!targetComponentId) {
       return res.status(400).json({ error: 'Target component ID is required' });
@@ -258,13 +266,13 @@ app.post('/api/jugaad', (req, res) => {
 
     const solutions = jugaadDetector.findAlternatives(targetComponent, availableInventory);
     
-    res.json({
+    return res.json({
       success: true,
       solutions
     });
   } catch (error) {
     console.error('Jugaad solutions error:', error);
-    res.status(500).json({ error: 'Internal server error during jugaad analysis' });
+    return res.status(500).json({ error: 'Internal server error during jugaad analysis' });
   }
 });
 
@@ -310,13 +318,13 @@ app.post('/api/negotiate', (req, res) => {
 
     const negotiation = negotiationDelta.calculateDiscount(sampleComponent, quantity, vendorId);
     
-    res.json({
+    return res.json({
       success: true,
       negotiation
     });
   } catch (error) {
     console.error('Negotiation calculation error:', error);
-    res.status(500).json({ error: 'Internal server error during negotiation calculation' });
+    return res.status(500).json({ error: 'Internal server error during negotiation calculation' });
   }
 });
 
@@ -364,7 +372,7 @@ app.post('/api/gray-market', (req, res) => {
     const availabilityPrediction = grayMarketAnalyzer.predictAvailability(sampleComponent);
     const riskAssessment = grayMarketAnalyzer.assessRisks(sampleComponent);
     
-    res.json({
+    return res.json({
       success: true,
       analysis: {
         pricing: priceAnalysis,
@@ -374,13 +382,13 @@ app.post('/api/gray-market', (req, res) => {
     });
   } catch (error) {
     console.error('Gray market analysis error:', error);
-    res.status(500).json({ error: 'Internal server error during gray market analysis' });
+    return res.status(500).json({ error: 'Internal server error during gray market analysis' });
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({
+  return res.json({
     success: true,
     message: 'Lamington Road Market Hardware Sourcing Engine is running',
     timestamp: new Date().toISOString(),
@@ -398,7 +406,13 @@ app.get('/api/health', (req, res) => {
 
 // Serve the main application
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  if (process.env.VERCEL) {
+    // In Vercel, this route shouldn't be hit due to vercel.json routing
+    return res.json({ message: 'API is running. UI should be served by Vercel static routing.' });
+  } else {
+    // Local development
+    return res.sendFile(path.join(__dirname, '../public/index.html'));
+  }
 });
 
 // Start server

@@ -8,7 +8,7 @@
     "dev": "ts-node src/server.ts",
     "start": "node dist/server.js",
     "serve": "ts-node src/server.ts",
-    "vercel-build": "echo 'No build step required'",
+    "vercel-build": "tsc",
     "verify-deployment": "node verify-deployment.js",
     "test": "jest",
     "test:watch": "jest --watch"

@@ -10,7 +10,7 @@ export default function handler(req, res) {
 
   return res.status(200).json({
     success: true,
-    message: 'Health check OK',
+    message: 'Health check OK - JavaScript version',
     timestamp: new Date().toISOString(),
     engines: {
       hardwareSourcing: 'active',

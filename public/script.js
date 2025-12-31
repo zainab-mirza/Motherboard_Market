@@ -552,6 +552,27 @@ Available Developer Commands:
 - help() - Show this help
 - showSection('section-name') - Navigate to section
 - checkSystemHealth() - Check API health
+- testApiConnection() - Test API connection manually
 - API_BASE - Current API base URL
     `);
+};
+
+window.testApiConnection = async function() {
+    console.log('🧪 Manual API Test Started');
+    try {
+        const response = await fetch('/api/health');
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response ok:', response.ok);
+        
+        const text = await response.text();
+        console.log('📄 Raw response:', text);
+        
+        const data = JSON.parse(text);
+        console.log('📊 Parsed data:', data);
+        
+        alert(`API Test Result:\nStatus: ${response.status}\nSuccess: ${data.success}\nMessage: ${data.message}`);
+    } catch (error) {
+        console.error('🚨 API Test Error:', error);
+        alert(`API Test Failed: ${error.message}`);
+    }
 };

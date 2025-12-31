@@ -2,36 +2,99 @@
 <html>
 <head>
     <title>API Debug Test</title>
+    <style>
+        body { font-family: monospace; background: #000; color: #00ff00; padding: 20px; }
+        button { background: #00ff00; color: #000; border: none; padding: 10px 20px; margin: 10px; cursor: pointer; }
+        #result { background: #111; padding: 20px; margin: 20px 0; border: 1px solid #00ff00; }
+    </style>
 </head>
 <body>
-    <h1>API Debug Test</h1>
+    <h1>🔧 API Debug Test - Lamington Road Market</h1>
     <button onclick="testHealth()">Test Health API</button>
-    <div id="result"></div>
+    <button onclick="testSearch()">Test Search API</button>
+    <button onclick="testAuth()">Test Authenticity API</button>
+    <div id="result">Click a button to test the API...</div>
 
     <script>
         async function testHealth() {
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = 'Testing...';
+            resultDiv.innerHTML = '🔍 Testing Health API...';
             
             try {
                 console.log('Calling /api/health...');
                 const response = await fetch('/api/health');
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
                 
                 const data = await response.json();
                 console.log('Response data:', data);
                 
                 resultDiv.innerHTML = `
-                    <h3>Success!</h3>
-                    <p>Status: ${response.status}</p>
-                    <p>Data: ${JSON.stringify(data, null, 2)}</p>
+                    <h3>✅ Health API Success!</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Success:</strong> ${data.success}</p>
+                    <p><strong>Message:</strong> ${data.message}</p>
+                    <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                    <p><strong>Engines:</strong> ${Object.keys(data.engines).length} active</p>
                 `;
             } catch (error) {
                 console.error('Error:', error);
                 resultDiv.innerHTML = `
-                    <h3>Error!</h3>
-                    <p>${error.message}</p>
+                    <h3>❌ Health API Failed!</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testSearch() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '🔍 Testing Search API...';
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'Intel i7 processor' })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>✅ Search API Success!</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Results:</strong> ${data.totalResults} components found</p>
+                    <p><strong>First Result:</strong> ${data.results[0]?.component?.partNumber}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>❌ Search API Failed!</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testAuth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '🔍 Testing Authenticity API...';
+            
+            try {
+                const response = await fetch('/api/authenticity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ componentId: 'TEST-123' })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>✅ Authenticity API Success!</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Confidence:</strong> ${data.analysis.confidenceScore}%</p>
+                    <p><strong>Weight Check:</strong> ${data.analysis.weightAnalysis.withinTolerance ? 'PASS' : 'FAIL'}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>❌ Authenticity API Failed!</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
                 `;
             }
         }

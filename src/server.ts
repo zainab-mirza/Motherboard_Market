@@ -415,13 +415,15 @@ app.get('/', (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Lamington Road Market Hardware Sourcing Engine`);
-  console.log(`🌐 Server running on http://localhost:${PORT}`);
-  console.log(`📊 BIOS Interface available at http://localhost:${PORT}`);
-  console.log(`🔧 API endpoints available at http://localhost:${PORT}/api/*`);
-  console.log(`⚡ All engines initialized and ready`);
-});
+// Start server (only in non-Vercel environments)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Lamington Road Market Hardware Sourcing Engine`);
+    console.log(`🌐 Server running on http://localhost:${PORT}`);
+    console.log(`📊 BIOS Interface available at http://localhost:${PORT}`);
+    console.log(`🔧 API endpoints available at http://localhost:${PORT}/api/*`);
+    console.log(`⚡ All engines initialized and ready`);
+  });
+}
 
 export default app;

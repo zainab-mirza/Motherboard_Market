@@ -297,17 +297,24 @@ async function analyzeGrayMarket() {
 
 async function checkSystemHealth() {
     try {
+        console.log('🔍 Checking system health at:', `${API_BASE}/health`);
         const response = await fetch(`${API_BASE}/health`);
+        console.log('📡 Health check response status:', response.status);
+        
         const data = await response.json();
+        console.log('📊 Health check data:', data);
         
         if (data.success) {
             document.getElementById('market-status').textContent = 'ONLINE';
             document.getElementById('market-status').className = 'status-online';
+            console.log('✅ Market status set to ONLINE');
         } else {
             document.getElementById('market-status').textContent = 'ERROR';
             document.getElementById('market-status').className = 'status-error';
+            console.log('❌ API returned success: false');
         }
     } catch (error) {
+        console.error('🚨 Health check failed:', error);
         document.getElementById('market-status').textContent = 'OFFLINE';
         document.getElementById('market-status').className = 'status-error';
     }

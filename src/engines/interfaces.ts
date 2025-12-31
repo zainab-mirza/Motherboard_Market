@@ -8,7 +8,15 @@ import {
   JugaadSolution,
   NegotiationResult,
   ComponentCategory,
-  MarketLocation
+  MarketLocation,
+  WeightComparison,
+  ThermalAssessment,
+  WiringInstructions,
+  AssemblyStep,
+  Vendor,
+  QuantityTier,
+  MarketFactors,
+  SafetyNote
 } from '../models';
 
 export interface ParsedSpecification {
@@ -83,39 +91,7 @@ export interface HardwareSourcingEngineInterface {
   searchComponents(query: SearchQuery): SearchResult[];
 }
 
-// Supporting interfaces
-export interface WeightComparison {
-  measuredWeight: number;
-  oemStandardWeight: number;
-  variance: number;
-  withinTolerance: boolean;
-}
-
-export interface ThermalAssessment {
-  heatSyncQuality: number;
-  thermalConductivity: number;
-  coolingEfficiency: number;
-  materialQuality: number;
-}
-
-export interface WiringInstructions {
-  diagramUrl: string;
-  pinMapping: { source: string; target: string }[];
-  requiredTools: string[];
-  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
-}
-
-export interface AssemblyStep {
-  stepNumber: number;
-  title: string;
-  description: string;
-  requiredTools: string[];
-  estimatedTime: number;
-  difficulty: string;
-  safetyNotes: string[];
-  safetyWarnings: string[];
-}
-
+// Additional interfaces not in models
 export interface PriceAnalysis {
   grayMarketPrice: number;
   officialPrice: number;
@@ -161,45 +137,6 @@ export interface ClarificationPrompt {
   options: string[];
   category: ComponentCategory;
   required: boolean;
-}
-
-export interface Vendor {
-  vendorId: string;
-  name: string;
-  reputation: {
-    overall: number;
-    authenticity: number;
-    pricing: number;
-    service: number;
-  };
-  specialties: ComponentCategory[];
-  negotiationProfile: {
-    minQuantityForDiscount: number;
-    maxDiscountPercentage: number;
-    preferredPaymentTerms: string[];
-  };
-}
-
-export interface QuantityTier {
-  minimumQuantity: number;
-  discountPercentage: number;
-  tierName: string;
-}
-
-export interface MarketFactors {
-  supplyLevel: string;
-  demandLevel: string;
-  competitionLevel: string;
-  seasonalTrend: string;
-  marketVolatility: string;
-}
-
-export interface SafetyNote {
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  message: string;
-  category: string;
-  description: string;
-  precautions: string[];
 }
 
 export interface NegotiationStrategy {

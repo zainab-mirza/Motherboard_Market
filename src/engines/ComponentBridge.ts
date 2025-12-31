@@ -5,13 +5,13 @@ import {
   ComponentCategory,
   CompatibilityLevel,
   AvailabilityStatus,
-  AuthenticityLevel
+  AuthenticityLevel,
+  AdapterSolution,
+  WiringInstructions
 } from '../models';
 import {
-  ComponentBridgeInterface,
-  WiringInstructions
+  ComponentBridgeInterface
 } from './interfaces';
-import { AdapterSolution } from '../models';
 
 export class ComponentBridge implements ComponentBridgeInterface {
   private adapterDatabase: Map<string, AdapterTemplate[]>;

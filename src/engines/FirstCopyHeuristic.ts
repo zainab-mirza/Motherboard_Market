@@ -3,14 +3,15 @@
 import {
   Component,
   ComponentCategory,
-  AuthenticityLevel
+  AuthenticityLevel,
+  WeightComparison,
+  ThermalAssessment,
+  AuthenticityAssessment,
+  QualityMetrics
 } from '../models';
 import {
-  FirstCopyHeuristicInterface,
-  WeightComparison,
-  ThermalAssessment
+  FirstCopyHeuristicInterface
 } from './interfaces';
-import { AuthenticityAssessment, QualityMetrics } from '../models';
 
 export class FirstCopyHeuristic implements FirstCopyHeuristicInterface {
   private oemStandards: Map<ComponentCategory, OEMStandard>;

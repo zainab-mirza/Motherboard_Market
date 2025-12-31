@@ -2,11 +2,15 @@
 
 import {
   Component,
-  ComponentCategory
+  ComponentCategory,
+  NegotiationResult,
+  QuantityTier,
+  MarketFactors
 } from '../models';
 import {
   NegotiationDeltaInterface,
-  NegotiationStrategy
+  NegotiationStrategy,
+  QuantityOptimization
 } from './interfaces';
 
 export class NegotiationDelta implements NegotiationDeltaInterface {
@@ -54,12 +58,11 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     const applicableThresholds = this.getApplicableThresholds(category, quantity);
     
     // Compile market factors
-    const marketFactors = {
-      supplyLevel: marketAdjustment.supplyLevel,
-      demandLevel: marketAdjustment.demandLevel,
-      competitionLevel: marketAdjustment.competitionLevel,
-      seasonalTrend: seasonalAdjustment > 0 ? 'Favorable' : seasonalAdjustment < 0 ? 'Unfavorable' : 'Neutral',
-      marketVolatility: marketAdjustment.volatility
+    const marketFactors: MarketFactors = {
+      supplyLevel: this.convertSupplyLevelToNumber(marketAdjustment.supplyLevel),
+      demandLevel: this.convertDemandLevelToNumber(marketAdjustment.demandLevel),
+      volatilityIndex: this.convertVolatilityToNumber(marketAdjustment.volatility),
+      seasonalFactor: seasonalAdjustment
     };
 
     return {
@@ -83,14 +86,11 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     const basePrice = component.pricing?.retailPrice || 0;
     if (basePrice === 0) {
       return {
-        optimalQuantity: 0,
-        totalCost: 0,
-        unitPrice: 0,
-        savingsPercentage: 0,
         recommendedQuantity: 0,
+        totalCost: 0,
         costPerUnit: 0,
-        breakEvenPoint: 0,
-        nextThreshold: null
+        savingsPercentage: 0,
+        breakEvenPoint: 0
       };
     }
 
@@ -103,9 +103,9 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     
     // Test each quantity tier to find optimal quantity within budget
     for (const tier of tiers) {
-      if (tier.minimumQuantity <= bestQuantity) {
-        const negotiationResult = this.calculateDiscount(component, tier.minimumQuantity);
-        const totalCost = negotiationResult.recommendedPrice * tier.minimumQuantity;
+      if (tier.minQuantity <= bestQuantity) {
+        const negotiationResult = this.calculateDiscount(component, tier.minQuantity);
+        const totalCost = negotiationResult.recommendedPrice * tier.minQuantity;
         
         if (totalCost <= budget) {
           const maxQuantityAtThisTier = Math.floor(budget / negotiationResult.recommendedPrice);
@@ -120,21 +120,14 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     }
 
     // Find next threshold
-    const nextThreshold = tiers.find(tier => tier.minimumQuantity > bestQuantity);
+    const nextThreshold = tiers.find(tier => tier.minQuantity > bestQuantity);
 
     return {
-      optimalQuantity: bestQuantity,
-      totalCost: bestQuantity * bestUnitPrice,
-      unitPrice: bestUnitPrice,
-      savingsPercentage: bestSavings,
       recommendedQuantity: bestQuantity,
+      totalCost: bestQuantity * bestUnitPrice,
       costPerUnit: bestUnitPrice,
-      breakEvenPoint: bestQuantity,
-      nextThreshold: nextThreshold ? {
-        quantity: nextThreshold.minimumQuantity,
-        unitPrice: this.calculateDiscount(component, nextThreshold.minimumQuantity).recommendedPrice,
-        additionalSavings: nextThreshold.discountPercentage - bestSavings
-      } : null
+      savingsPercentage: bestSavings,
+      breakEvenPoint: bestQuantity
     };
   }
 
@@ -159,20 +152,20 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     
     // Processor quantity tiers
     tiers.set(ComponentCategory.PROCESSOR, [
-      { minimumQuantity: 1, discountPercentage: 0, tierName: 'Retail', minQuantity: 1, maxQuantity: 4, pricePerUnit: 25000 },
-      { minimumQuantity: 5, discountPercentage: 8, tierName: 'Small Bulk', minQuantity: 5, maxQuantity: 9, pricePerUnit: 23000 },
-      { minimumQuantity: 10, discountPercentage: 15, tierName: 'Medium Bulk', minQuantity: 10, maxQuantity: 24, pricePerUnit: 21250 },
-      { minimumQuantity: 25, discountPercentage: 22, tierName: 'Large Bulk', minQuantity: 25, maxQuantity: 49, pricePerUnit: 19500 },
-      { minimumQuantity: 50, discountPercentage: 30, tierName: 'Wholesale', minQuantity: 50, maxQuantity: 999, pricePerUnit: 17500 }
+      { minQuantity: 1, maxQuantity: 4, discountPercentage: 0, pricePerUnit: 25000 },
+      { minQuantity: 5, maxQuantity: 9, discountPercentage: 8, pricePerUnit: 23000 },
+      { minQuantity: 10, maxQuantity: 24, discountPercentage: 15, pricePerUnit: 21250 },
+      { minQuantity: 25, maxQuantity: 49, discountPercentage: 22, pricePerUnit: 19500 },
+      { minQuantity: 50, maxQuantity: 999, discountPercentage: 30, pricePerUnit: 17500 }
     ]);
 
     // Memory quantity tiers
     tiers.set(ComponentCategory.MEMORY, [
-      { minimumQuantity: 1, discountPercentage: 0, tierName: 'Retail', minQuantity: 1, maxQuantity: 3, pricePerUnit: 6500 },
-      { minimumQuantity: 4, discountPercentage: 10, tierName: 'Kit Discount', minQuantity: 4, maxQuantity: 9, pricePerUnit: 5850 },
-      { minimumQuantity: 10, discountPercentage: 18, tierName: 'Small Bulk', minQuantity: 10, maxQuantity: 19, pricePerUnit: 5330 },
-      { minimumQuantity: 20, discountPercentage: 25, tierName: 'Medium Bulk', minQuantity: 20, maxQuantity: 49, pricePerUnit: 4875 },
-      { minimumQuantity: 50, discountPercentage: 35, tierName: 'Wholesale', minQuantity: 50, maxQuantity: 999, pricePerUnit: 4225 }
+      { minQuantity: 1, maxQuantity: 3, discountPercentage: 0, pricePerUnit: 6500 },
+      { minQuantity: 4, maxQuantity: 9, discountPercentage: 10, pricePerUnit: 5850 },
+      { minQuantity: 10, maxQuantity: 19, discountPercentage: 18, pricePerUnit: 5330 },
+      { minQuantity: 20, maxQuantity: 49, discountPercentage: 25, pricePerUnit: 4875 },
+      { minQuantity: 50, maxQuantity: 999, discountPercentage: 35, pricePerUnit: 4225 }
     ]);
 
     return tiers;
@@ -240,16 +233,15 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     const tiers = this.quantityTiers.get(category) || [];
     
     let applicableTier = tiers[0] || { 
-      minimumQuantity: 1, 
+      minQuantity: 1, 
       discountPercentage: 0, 
       tierName: 'Retail',
-      minQuantity: 1,
       maxQuantity: 999,
       pricePerUnit: 0
     };
     
     for (const tier of tiers) {
-      if (quantity >= tier.minimumQuantity) {
+      if (quantity >= tier.minQuantity) {
         applicableTier = tier;
       } else {
         break;
@@ -299,7 +291,7 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
 
   private getApplicableThresholds(category: ComponentCategory, currentQuantity: number): QuantityTier[] {
     const tiers = this.quantityTiers.get(category) || [];
-    return tiers.filter(tier => tier.minimumQuantity > currentQuantity).slice(0, 3);
+    return tiers.filter(tier => tier.minQuantity > currentQuantity).slice(0, 3);
   }
 
   private generateNegotiationStrategy(component: Component, quantity: number, discountPercentage: number): string[] {
@@ -379,9 +371,36 @@ export class NegotiationDelta implements NegotiationDeltaInterface {
     
     return tactics;
   }
+
+  private convertSupplyLevelToNumber(level: 'Low' | 'Normal' | 'High'): number {
+    switch (level) {
+      case 'Low': return 0.3;
+      case 'Normal': return 0.6;
+      case 'High': return 0.9;
+      default: return 0.6;
+    }
+  }
+
+  private convertDemandLevelToNumber(level: 'Low' | 'Medium' | 'High'): number {
+    switch (level) {
+      case 'Low': return 0.3;
+      case 'Medium': return 0.6;
+      case 'High': return 0.9;
+      default: return 0.6;
+    }
+  }
+
+  private convertVolatilityToNumber(volatility: 'Low' | 'Medium' | 'High'): number {
+    switch (volatility) {
+      case 'Low': return 0.2;
+      case 'Medium': return 0.5;
+      case 'High': return 0.8;
+      default: return 0.5;
+    }
+  }
 }
 
-// Supporting interfaces
+// Supporting interfaces for internal use
 interface MarketCondition {
   supplyLevel: 'Low' | 'Normal' | 'High';
   demandLevel: 'Low' | 'Medium' | 'High';
@@ -398,44 +417,4 @@ interface VendorProfile {
   discountBonus: number;
   relationshipLevel: 'New' | 'Good' | 'Excellent';
   paymentTermsFlexibility: number;
-}
-
-interface QuantityOptimization {
-  optimalQuantity: number;
-  totalCost: number;
-  unitPrice: number;
-  savingsPercentage: number;
-  recommendedQuantity: number;
-  costPerUnit: number;
-  breakEvenPoint: number;
-  nextThreshold: {
-    quantity: number;
-    unitPrice: number;
-    additionalSavings: number;
-  } | null;
-}
-
-interface QuantityTier {
-  minimumQuantity: number;
-  discountPercentage: number;
-  tierName: string;
-  minQuantity: number;
-  maxQuantity: number;
-  pricePerUnit: number;
-}
-
-interface NegotiationResult {
-  recommendedPrice: number;
-  discountPercentage: number;
-  quantityThresholds: QuantityTier[];
-  marketConditions: any;
-  basePrice: number;
-  savings: number;
-  negotiationStrategy: string[];
-  priceBreakdown: {
-    quantityDiscount: number;
-    marketAdjustment: number;
-    vendorBonus: number;
-    seasonalAdjustment: number;
-  };
 }

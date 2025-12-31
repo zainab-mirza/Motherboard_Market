@@ -3,14 +3,14 @@
 import {
   Component,
   ComponentCategory,
-  AuthenticityLevel
-} from '../models';
-import {
-  JugaadDetectorInterface,
+  AuthenticityLevel,
+  JugaadSolution,
   AssemblyStep,
   SafetyNote
+} from '../models';
+import {
+  JugaadDetectorInterface
 } from './interfaces';
-import { JugaadSolution } from '../models';
 
 export class JugaadDetector implements JugaadDetectorInterface {
   private workaroundDatabase: Map<string, JugaadTemplate[]>;
@@ -387,8 +387,6 @@ export class JugaadDetector implements JugaadDetectorInterface {
     // Template-specific warnings
     warnings.push({
       severity: template.safetyRisk.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
-      message: `This modification has ${template.safetyRisk.toLowerCase()} safety risk`,
-      category: 'General',
       description: `This modification has ${template.safetyRisk.toLowerCase()} safety risk`,
       precautions: ['Follow all safety guidelines', 'Use proper tools and equipment']
     });
@@ -401,8 +399,6 @@ export class JugaadDetector implements JugaadDetectorInterface {
         if (!rule.checkFunction(components)) {
           warnings.push({
             severity: rule.severity.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
-            message: rule.rule,
-            category: component.category.toString(),
             description: rule.rule,
             precautions: ['Verify all connections', 'Test thoroughly before use']
           });
@@ -415,8 +411,6 @@ export class JugaadDetector implements JugaadDetectorInterface {
     if (totalPower > 500) {
       warnings.push({
         severity: 'high',
-        message: 'High power consumption - ensure adequate cooling and power supply',
-        category: 'Power',
         description: 'High power consumption - ensure adequate cooling and power supply',
         precautions: ['Use adequate power supply', 'Ensure proper cooling', 'Monitor temperatures']
       });
